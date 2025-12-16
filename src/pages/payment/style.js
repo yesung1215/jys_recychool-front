@@ -8,22 +8,22 @@ const S = {};
  * ============================= */
 
 S.Page = styled.div`
-  width: 100%;
+  width: 1160px;
   margin: 0 auto;
 `;
 
 // 12컬럼 그리드: col=80px, gutter=40px, margin=260px
 S.Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(12, 80px);
+  width: 100%;
+  grid-template-columns: repeat(12, 1fr);
   column-gap: 40px;
-  padding: 0 260px;
   align-items: start;
 `;
 
 // 좌 7칸 / 우 5칸
 S.Left = styled.section`
-  grid-column: 1 / span 7;
+  width: 560px;
 `;
 
 S.Right = styled.aside`
