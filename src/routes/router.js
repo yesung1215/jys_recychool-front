@@ -10,7 +10,7 @@ import SignUp from "../pages/sign-up/SignUp";
 import FindUser from "../pages/find/FindUser";
 import MyPage from "../pages/MyPage";
 import Reserve from "../pages/reserve/Reserve";
-import Payment from "../pages/Payment";
+import Payment from "../pages/payment/Payment";
 import Main from "../pages/Main";
 import SignIn from "../pages/sign-in/SignIn";
 import OauthSuccess from "../pages/sign-in/OauthSuccess";

@@ -6,8 +6,9 @@ import './index.css';
 import App from './App';
 import store from './store';
 import reportWebVitals from './reportWebVitals';
-import GlobalStyle from './styles/global';
-import theme from './styles/theme';
+import GlobalStyle from "./styles/global";
+import theme from "./styles/theme";
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
