@@ -11,7 +11,7 @@ import FindUser from "../pages/find/FindUser";
 import MyPage from "../pages/MyPage";
 import Reserve from "../pages/Reserve";
 import Payment from "../pages/Payment";
-import Main from "../pages/Main";
+import Main from "../pages/main/Main";
 import SignIn from "../pages/sign-in/SignIn";
 import OauthSuccess from "../pages/sign-in/OauthSuccess";
 import FindEmail from "../pages/find/FindEmail";
