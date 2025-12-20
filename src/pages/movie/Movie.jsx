@@ -18,7 +18,7 @@ const Movie = () => {
   useEffect(() => {
     const fetchSchools = async () => {
       try {
-        const res = await fetch(`${API}/schools`);
+        const res = await fetch(`${API}//reservations/movie-schools`);
         const json = await res.json();
         if (!res.ok) throw new Error(json?.message || '학교 목록 조회 실패');
 
