@@ -20,6 +20,7 @@ import Verify from "../pages/sign-up/veirfy/Verify";
 import Terms from "../pages/sign-up/Terms";
 import Info from "../pages/sign-up/Info";
 import Complete from "../pages/sign-up/Complete";
+import Movie from "../pages/movie/Movie";
 
 
 const router = createBrowserRouter([
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
       {
         path: "my-page",
         element: <MyPage />
+      },
+      {
+        path: "movie",
+        element: <Movie />
       },
       {
         path: "reserve/place/:schoolId",
