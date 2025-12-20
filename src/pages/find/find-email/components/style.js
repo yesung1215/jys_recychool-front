@@ -110,4 +110,54 @@ S.Input = styled.input`
     cursor: not-allowed;
   }
 `
+
+S.Label = styled.p`
+  ${h6Bold}
+  margin: 0;
+`
+
+S.TimerWrap = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px;
+`
+
+S.TimerText = styled.span`
+  color: ${({ theme }) => theme.PALETTE.primary.green.main};
+  font-weight: bold;
+  font-size: 14px;
+`
+
+S.ResendButton = styled.div`
+  color: ${({ theme }) => theme.PALETTE.secondary.blue.main};
+  cursor: pointer;
+  font-size: 14px;
+  ${h6Medium}
+  
+  &:hover {
+    opacity: 0.8;
+  }
+`
+
+S.NextStep = styled.div`
+  width: 680px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  ${h5Bold}
+  color: #fff;
+  background-color: ${({ theme, disabled }) => 
+    disabled ? '#ccc' : theme.PALETTE.primary.green.main};
+  border-radius: 4px;
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
+  margin-top: 24px;
+  
+  &:hover {
+    opacity: ${({ disabled }) => disabled ? 1 : 0.9};
+  }
+`
+
 export default S;

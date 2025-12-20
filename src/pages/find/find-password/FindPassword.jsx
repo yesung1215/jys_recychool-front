@@ -1,10 +1,23 @@
 import React from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import S from './components/style';
+import FindPasswordComponent from './components/FindPasswordComponent';
 
 const FindPassword = () => {
+  const location = useLocation();
+  const isInfoPage = location.pathname.includes('/info');
+  const isCompletePage = location.pathname.includes('/complete');
+
   return (
-    <div>
-      비밀번호 찾기
-    </div>
+    <>
+      {!isInfoPage && !isCompletePage ? (
+        <S.LayOut>
+          <FindPasswordComponent />
+        </S.LayOut>
+      ) : (
+        <Outlet />
+      )}
+    </>
   );
 };
 
