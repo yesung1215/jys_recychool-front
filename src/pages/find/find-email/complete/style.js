@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { h2Bold, h3Bold, h5Medium, h6Bold, h6Light, h6Medium } from '../../styles/common';
+import { h2Bold, h3Bold, h5Medium, h6Bold, h6Light, h6Medium } from '../../../../styles/common';
 import { Link } from 'react-router-dom';
 const S = {};
 S.LayOut = styled.div`
