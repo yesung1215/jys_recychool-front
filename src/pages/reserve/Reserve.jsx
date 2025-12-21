@@ -1,74 +1,67 @@
-import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import LeftPanel from "./components/LeftPanel";
+import RightPanel from "./components/RightPanel";
 import S from "./style";
-import ReservationCalendar from "./components/ReservationCalendar";
+
+/**
+ * 예약 페이지 데이터 조회
+ * @returns ApiResponseDTO<SchoolReservePageResponseDTO>
+ */
+const fetchReservePage = async ({ queryKey }) => {
+  const [, schoolId, type] = queryKey;
+
+  const res = await fetch(
+    `${process.env.REACT_APP_BACKEND_URL}/api/public/schools/${schoolId}/${type}`
+  );
+
+  if (!res.ok) {
+    throw new Error("예약 페이지 조회 실패");
+  }
+
+  return res.json();
+};
 
 const Reserve = () => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const schoolId = 1;
+  const type = "place"; // "parking" 가능
+
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["reservePage", schoolId, type],
+    queryFn: fetchReservePage,
+  });
+
+  if (isLoading) {
+    return <div>로딩중...</div>;
+  }
+
+  if (isError) {
+    return <div>에러 발생</div>;
+  }
+
+  const reserveData = data.data;
 
   return (
     <S.Page>
-      <S.Grid>
-        <S.LeftPanel>
-          <S.LeftContent>
-            <S.Title>영월초등학교</S.Title>
+      <S.Container>
+        <S.ContentRow>
+          <LeftPanel
+            data={reserveData}
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+          />
 
-            <S.ImageBox />
-
-            <S.CalendarBox>
-              <ReservationCalendar
-                startDate={startDate}
-                endDate={endDate}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-              />
-            </S.CalendarBox>
-
-          </S.LeftContent>
-        </S.LeftPanel>
-
-        <S.RightPanel>
-          <S.InfoRow>
-            <span>도로명 주소</span>
-            <p>경기도 포천시 영중면 영평로1429번길5</p>
-          </S.InfoRow>
-
-          <S.InfoRow>
-            <span>면적</span>
-            <p>4993㎡</p>
-          </S.InfoRow>
-
-          <S.InfoRow>
-            <span>연락처</span>
-            <p>031-539-0033</p>
-          </S.InfoRow>
-
-          <S.InfoRow>
-            <span>사용료</span>
-            <p>50,000원/월</p>
-          </S.InfoRow>
-
-          <S.InfoRow>
-            <span>이용 시간</span>
-            <p>18:00 ~ 08:00(익일)</p>
-          </S.InfoRow>
-
-          <S.InfoRow $last>
-            <span>날짜</span>
-            <p>
-              {startDate && endDate
-                ? `${startDate.format("MM월 DD일")} ~ ${endDate.format(
-                    "MM월 DD일"
-                  )}`
-                : "날짜를 선택하세요"}
-            </p>
-          </S.InfoRow>
-
-          <S.ReserveButton>예약하기</S.ReserveButton>
-        </S.RightPanel>
+          <RightPanel
+            data={reserveData}
+            type={type}
+            selectedDate={selectedDate}
+          />
+        </S.ContentRow>
 
         <S.MapSection />
-      </S.Grid>
+      </S.Container>
     </S.Page>
   );
 };

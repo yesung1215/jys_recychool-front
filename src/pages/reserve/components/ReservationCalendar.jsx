@@ -9,12 +9,18 @@ import styled from "styled-components";
 
 const MAX_CAPACITY = 30;
 
+/**
+ * 🔹 임시 더미 데이터
+ * 나중에 백엔드에서 날짜별 예약 수 내려주면 교체
+ */
 const reservationCountByDate = {
   "2024-12-14": 5,
   "2024-12-15": 17,
   "2024-12-16": 30,
   "2024-12-17": 22,
 };
+
+/* ================= 스타일 ================= */
 
 const CalendarWrapper = styled.div`
   width: 100%;
@@ -52,6 +58,8 @@ const CountText = styled.div`
   pointer-events: none;
 `;
 
+/* ================= 커스텀 Day ================= */
+
 function CustomDay(props) {
   const { day, outsideCurrentMonth, ...other } = props;
   const key = day.format("YYYY-MM-DD");
@@ -64,7 +72,11 @@ function CustomDay(props) {
         {...other}
         day={day}
         outsideCurrentMonth={outsideCurrentMonth}
-        sx={{ width: 36, height: 36, borderRadius: "8px" }}
+        sx={{
+          width: 36,
+          height: 36,
+          borderRadius: "8px",
+        }}
       />
       {!outsideCurrentMonth && (
         <CountText $full={isFull}>
@@ -75,27 +87,26 @@ function CustomDay(props) {
   );
 }
 
+/* ================= 메인 캘린더 ================= */
+
 const ReservationCalendar = ({
-  startDate,
-  endDate,
-  setStartDate,
-  setEndDate,
+  selectedDate,
+  onSelectDate,
+  unavailableDates = [],
 }) => {
   const today = dayjs().startOf("day");
   const maxDate = dayjs().add(1, "month").endOf("day");
 
   const handleChange = (newDate) => {
-    if (!startDate || endDate) {
-      setStartDate(newDate);
-      setEndDate(null);
-      return;
-    }
-    if (newDate.isBefore(startDate)) {
-      setEndDate(startDate);
-      setStartDate(newDate);
-    } else {
-      setEndDate(newDate);
-    }
+    if (!newDate) return;
+
+    const dateKey = newDate.format("YYYY-MM-DD");
+
+    // ❌ 예약 불가 날짜만 차단 (PLACE 전용 개념)
+    if (unavailableDates.includes(dateKey)) return;
+
+    // ✅ 선택 가능 (만석이어도 가능)
+    onSelectDate(newDate.toDate());
   };
 
   return (
@@ -103,13 +114,16 @@ const ReservationCalendar = ({
       <CalendarWrapper>
         <StaticDatePicker
           displayStaticWrapperAs="desktop"
-          value={startDate}
+          value={selectedDate ? dayjs(selectedDate) : null}
           onChange={handleChange}
           minDate={today}
           maxDate={maxDate}
           disablePast
           showToolbar={false}
-          slots={{ actionBar: () => null, day: CustomDay }}
+          slots={{
+            actionBar: () => null,
+            day: CustomDay,
+          }}
         />
       </CalendarWrapper>
     </LocalizationProvider>
