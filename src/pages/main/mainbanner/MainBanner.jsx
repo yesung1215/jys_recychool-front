@@ -5,12 +5,16 @@ import InfoCard from '../infocard/InfoCard';
 
 const MainBanner = () => {
     const [selected, setSelected] = useState(null);
+
+    const handleSelect = (payload) => {
+        setSelected(prev => (prev?.id === payload?.id ? null : payload));
+    }
     return (
         <div>
             <S.BannerWrap>
                 <S.ContentRow>
                     <S.MapPane>
-                        <KakaoMap onSelect={setSelected}/>
+                        <KakaoMap onSelect={handleSelect} selected={selected}/>
                     </S.MapPane>
 
                     <S.SidePane>
