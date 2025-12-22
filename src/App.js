@@ -5,6 +5,9 @@ import './App.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser, setUserStatus } from './modules/user';
 import { useEffect } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 function App() {
   const dispatch = useDispatch()
@@ -17,7 +20,7 @@ function App() {
         const apiPath = '/private/users/me';
         const backendUrl = process.env.REACT_APP_BACKEND_URL;
         const fullUrl = `${backendUrl}${apiPath}`;
-        
+
         try {
           const response = await fetch(fullUrl, {
             headers: {
@@ -29,7 +32,7 @@ function App() {
           if (response.ok) {
             const datas = await response.json();
             const profile = datas.data;
-            
+
             if (profile) {
               const userData = {
                 id: profile.id || profile.userId || 0,
@@ -44,7 +47,7 @@ function App() {
                 userNickname: profile.userNickname || profile.nickname || "",
                 userProvider: profile.userProvider || profile.provider || "",
               };
-              
+
               dispatch(setUser(userData));
               dispatch(setUserStatus(true));
               return;
@@ -59,7 +62,7 @@ function App() {
         } catch (error) {
           // 에러 발생 시 무시
         }
-        
+
         dispatch(setUserStatus(true));
       }
 
@@ -69,9 +72,13 @@ function App() {
       dispatch(setUserStatus(false));
     }
   }, [accessToken, dispatch])
+
+
   return (
     <>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
       {/* 개발 환경에서 Redux 상태 확인용 */}
       {/* {process.env.NODE_ENV === 'development' && <ReduxDebugger />} */}
     </>
