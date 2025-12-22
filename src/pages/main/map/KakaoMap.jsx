@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Map as KMap, MapMarker, Polygon, Polyline } from 'react-kakao-maps-sdk';
 import S from './style';
 import proj4 from 'proj4';
@@ -80,8 +80,37 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
     const [internalEdges, setInternalEdges] = useState([]);
     const [outerEdges, setOuterEdges] = useState([]);
     const [selected, setSelected] = useState(null);
+    const [hoverId, setHoverId] = useState(null);
     // const [schoolRings, setSchoolRings] = useState([]);
     const mapRef = useRef(null);
+
+    
+                    const normalSrc = '/assets/images/pink.png';
+                    const hoverSrc = '/assets/images/blue_marker.png';
+                    const selectedSrc = '/assets/images/blue_marker.png';
+
+                    const makeImage = (src, size) => ({ src, size: { width: size, height: size } });
+
+    const handleMarkerMouseOver = useCallback((id, e) => {
+        e?.stopPropagation?.();
+        setHoverId(id);
+    }, []);
+
+    const handleMarkerMouseOut = useCallback((e) => {
+        e?.stopPropagation?.();
+        setHoverId(null);
+    }, []);
+    const handleMarkerClick = useCallback((school, e) => {
+        e?.stopPropagation?.();
+        onSelect?.({
+            id: school.raw.id,
+            title: school.title,
+            address: school.raw.schoolAddress,
+            phone: school.raw.schoolPhone,
+            image: school.raw.schoolImagePath,
+            raw: school.raw
+        });
+    }, [onSelect]);
 
     const fetchJson = async (url) => {
         const res = await fetch(url);
@@ -207,7 +236,7 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
             ring.forEach((p) => bounds.extend(new kakao.maps.LatLng(p.lat, p.lng)));
         });
         map.setBounds(bounds);
-        // map.setDraggable(false);
+        map.setDraggable(true);
         map.setZoomable(true);
         map.setMinLevel(7);
         map.setMaxLevel(11)
@@ -242,14 +271,14 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
 
     const seoulGroup = useMemo(
         () => features.filter(({ props }) => {
-            const code = props?.SIG_CD ?? '';
+            const code = props?.CTPRVN_CD ?? '';
             return typeof code === 'string' && code.slice(0, 2) === '11';
         }),
         [features]
     );
     const gyeonggiGroup = useMemo(
         () => features.filter(({ props }) => {
-            const code = props?.SIG_CD ?? '';
+            const code = props?.CTPRVN_CD ?? '';
             return typeof code === 'string' && code.slice(0, 2) === '41';
         }),
         [features]
@@ -275,11 +304,13 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
         return features.map(({ ring }) => ring);
     }, [features])
 
-    console.log("schoolRings", schoolRings.length, schoolRings[0]);
+    const memoCenter = useMemo(() => center, [center.lat, center.lng]);
+
+    console.log('KMap props', { features, schoolRings, center});
     return (
-        <S.MapWrap style={{ width: 494, height: 550 }}>
+        <S.MapWrap style={{ width: 550, height: 550 }}>
             <KMap
-                center={center}
+                center={memoCenter}
                 style={{ width: '100%', height: '100%' }}
                 level={9}
                 onCreate={onMapCreate}
@@ -287,7 +318,7 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
                 {features.map(({ ring, props }, idx) => {
                     const name = props?.SIG_KOR_NM ?? props?.name ?? `SGG-${idx}`;
                     const code = props?.SIG_CD ?? props?.code ?? '';
-                    const seoulColor = String(props?.SIG_CD ?? props?.code ?? '').startsWith('11')
+                    const seoulColor = String(props?.CTPRVN_CD ?? props?.code ?? '').startsWith('11')
                     return (
                         <Polygon
                             key={`sgg-fill-${idx}`}
@@ -342,24 +373,41 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
                         zIndex={20}
                     />
                 ))}
-                {schoolRings.map((school, idx) => (
-                    <MapMarker
-                        key={`school-${idx}`}
-                        position={{ lat: school.lat, lng: school.lng }}
-                        title={school.title}
-                        image={{ src: '/assets/images/pink.png', size: { width: 9, height: 9 } }}
-                        onClick={() => {
-                            onSelect?.({
-                                id: school.raw.id,
-                                title: school.title,
-                                address: school.raw.schoolAddress,
-                                phone: school.raw.schoolPhone,
-                                image: school.raw.schoolImagePath,
-                                raw: school.raw
-                            })
-                        }}
-                    />
-                ))}
+                {schoolRings.map((school, idx) => {
+                    const id = school.raw?.id ?? `school-${idx}`;
+                    const isSelected = selected?.id === id;
+                    const isHovered = hoverId === id;
+
+
+                    const size = isSelected ? 14 : isHovered ? 12 : 10;
+                    const src = isSelected ? selectedSrc : isHovered ? hoverSrc : normalSrc;
+
+                    const image = { src, size: { width: size, height: size } };
+
+                    return (
+                        <MapMarker
+                            key={`school-${idx}`}
+                            position={{ lat: school.lat, lng: school.lng }}
+                            title={school.title}
+                            image={image}
+                            onMouseOver={() => handleMarkerMouseOver(id)}
+                            onMouseOut={(e) => { e?.stopPropagation?.(); handleMarkerMouseOut() }}
+                            onClick={(e) => {
+                                e?.stopPropagation?.();
+                                onSelect?.({
+                                    id: school.raw.id,
+                                    title: school.title,
+                                    address: school.raw.schoolAddress,
+                                    phone: school.raw.schoolPhone,
+                                    image: school.raw.schoolImagePath,
+                                    raw: school.raw
+                                })
+                            }}
+                        />
+                    )
+                }
+
+                )}
             </KMap>
         </S.MapWrap>
 
