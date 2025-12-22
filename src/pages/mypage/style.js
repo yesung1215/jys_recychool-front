@@ -104,6 +104,8 @@ S.EditBtn = styled.button`
   align-items: center;
   justify-content: center;
 
+  &:hover { background-color: #5EA50B; }
+  
   background-color: ${({ theme, $disabled }) =>
     $disabled ? "#EFFBEA" : theme.PALETTE.primary.green.main};
 
@@ -126,6 +128,8 @@ S.SubmitBtn = styled.button`
   border-radius: 4px;
   border: none;
   cursor: pointer;
+
+  &:hover { background-color: ${({ theme }) => theme.PALETTE.primary.green.dark}; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); transform: translateY(-2px); }
 `;
 
 S.PasswordInputBox = styled.input`
