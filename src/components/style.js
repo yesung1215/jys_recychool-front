@@ -4,8 +4,8 @@ const S = {};
 
 S.FloatingWrapper = styled.div`
   position: fixed;
-  right: 24px;
-  bottom: 500px;
+  right: 40px;
+  bottom: 80px;
   z-index: 1000;
 `;
 

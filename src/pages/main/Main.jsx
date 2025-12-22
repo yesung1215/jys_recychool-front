@@ -4,6 +4,7 @@ import useOAuthCallback from '../../hooks/useOAuthCallback';
 import S from './style';
 import MainBanner from './mainbanner/MainBanner';
 import MainCategorySide from './maincategoryside/MainCategorySide';
+import FloatingButton from '../../components/FloatingButton';
 
 const Main = () => {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,7 @@ const Main = () => {
         <MainBanner />
         <MainCategorySide />
       </S.MainWrap>
+      <FloatingButton />
     </div>
   );
 };

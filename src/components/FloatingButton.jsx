@@ -29,11 +29,11 @@ const FloatingButton = () => {
               <S.SchoolFloationButton>
                 <S.SchoolFloationButton1>1</S.SchoolFloationButton1>
                 <S.SchoolFloationButton2>2</S.SchoolFloationButton2>
-                <S.SchoolFloationButton3>3</S.SchoolFloationButton3>
+                {/* <S.SchoolFloationButton3>3</S.SchoolFloationButton3> */}
               </S.SchoolFloationButton>
             )}
             <S.SubFloatingButton3 onClick={toggleSchoolMenu}>
-              <img src="/assets/images/school.png" alt="학교" />
+              <img src="/assets/images/schooll.png" alt="학교" />
             </S.SubFloatingButton3>
             
             
