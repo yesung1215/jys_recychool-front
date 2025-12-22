@@ -60,25 +60,17 @@ const Movie = () => {
     }
 
     try {
-      // 쿼리 파라미터 방식으로 전송
-      const params = new URLSearchParams({
-        schoolId: selectedSchoolId,
-        movieTitle: "코렐라인",
-        userId: "1"
-      });
-
-      const res = await fetch(`${API}/reservations/write?${params.toString()}`, {
+      // 쿼리 파라미터 방식으로 전송 (백엔드 @RequestParam에 맞춤)
+      const url = `${API}/reservations/write?schoolId=${selectedSchoolId}&movieTitle=코렐라인&userId=1`;
+      const res = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json', 
-        },
       });
 
       if (res.ok) {
         alert("예약 성공!");
         fetchRemainingSeats(); 
       } else {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => null);
         alert(errorData?.message || "예약 실패... 다시 시도해주세요.");
       }
     } catch (error) {
@@ -171,8 +163,9 @@ const Movie = () => {
                   <img src="/assets/images/red.png" alt="위치 아이콘" />
                 </S.CardIcon>
                 <S.CardImg>
-                  <img src="/assets/images/movieschool1.png" alt="학교" />
+                   <img src="/assets/images/movieschool1.png" alt="학교" />
                 </S.CardImg>
+
                 <S.SchoolName>양평초</S.SchoolName>
                 <S.InfoLine><img src="/assets/images/marker.png" alt="학교 주소" /><span>경기도 포천시 영중면 전영로1429번길 5</span></S.InfoLine>
                 <S.InfoLine><img src="/assets/images/phone.png" alt="전화" /><span>031-539-0033</span></S.InfoLine>
@@ -186,6 +179,7 @@ const Movie = () => {
                 <S.CardImg>
                   <img src="/assets/images/movieschool2.jpg" alt="학교" />
                 </S.CardImg>
+
                 <S.SchoolName>덕수고</S.SchoolName>
                 <S.InfoLine><img src="/assets/images/marker.png" alt="학교 주소" /><span>서울특별시 성동구 왕십리로 199</span></S.InfoLine>
                 <S.InfoLine><img src="/assets/images/phone.png" alt="전화" /><span>02-2286-3704</span></S.InfoLine>
@@ -197,11 +191,12 @@ const Movie = () => {
                   <img src="/assets/images/yellow.png" alt="위치 아이콘" />
                 </S.CardIcon>
                 <S.CardImg>
-                  <img src="/assets/images/movieschool3.png" alt="학교" />
+                   <img src="/assets/images/movieschool3.png" alt="학교" />
                 </S.CardImg>
+                
                 <S.SchoolName>구.백성초</S.SchoolName>
                 <S.InfoLine><img src="/assets/images/marker.png" alt="학교 주소" /><span>경기도 안성시 백성2길 59</span></S.InfoLine>
-                <S.InfoLine><img src="/assets/images/phone.png" alt="전화" /><span>031-678-5271</span></S.InfoLine>
+                <S.InfoLine><img src="/assets/images/phone.png" alt="전화" /><span>031-678-5271</span></S.InfoLine> 
               </S.Card>
             </S.CardGrid>
           </S.SchoolInfo>
