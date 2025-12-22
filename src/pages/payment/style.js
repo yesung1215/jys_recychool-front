@@ -96,15 +96,34 @@ S.PayLeft = styled.div`
 `;
 
 S.PayIcon = styled.div`
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: #f4f4f4;
-  font-size: 14px;
-  font-weight: 800;
-  color: #111;
+  width: 64px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 64px;
+  overflow: hidden;
+`;
+
+S.PayIconImg = styled.img`
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+
+  /* 기본 */
+  transform: scale(0.62);
+  transform-origin: center;
+
+  /* 토스 */
+  &[data-pay="toss"] {
+    transform: scale(1.5);
+  }
+
+  /* 카카오 */
+  &[data-pay="kakao"] {
+    transform: scale(0.68);
+  }
 `;
 
 S.PayText = styled.div`
@@ -204,6 +223,7 @@ S.SummaryVal = styled.div`
 
 S.SummaryValPrice = styled.div`
   ${C.h4Bold}
+  color: ${({ theme }) => theme.PALETTE.secondary.pink.main};
   text-align: right;
 `;
 

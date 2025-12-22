@@ -28,7 +28,12 @@ const PaymentForm = ({ user, reserve, payType, setPayType }) => {
         <S.PayList>
           <S.PayRow onClick={() => setPayType("GENERAL")}>
             <S.PayLeft>
-              <S.PayIcon aria-hidden>💳</S.PayIcon>
+              <S.PayIcon aria-hidden>
+                <S.PayIconImg
+                  src="/assets/images/payment/general_Icon.png"
+                  alt="일반결제"
+                />
+              </S.PayIcon>
               <S.PayText>일반결제</S.PayText>
             </S.PayLeft>
 
@@ -39,7 +44,13 @@ const PaymentForm = ({ user, reserve, payType, setPayType }) => {
 
           <S.PayRow onClick={() => setPayType("TOSS")}>
             <S.PayLeft>
-              <S.PayIcon aria-hidden>toss</S.PayIcon>
+              <S.PayIcon aria-hidden>
+                <S.PayIconImg
+                  src="/assets/images/payment/tossPay_Icon.png"
+                  alt="토스페이"
+                  data-pay="toss"
+                />
+              </S.PayIcon>
               <S.PayText>토스페이</S.PayText>
             </S.PayLeft>
 
@@ -50,7 +61,13 @@ const PaymentForm = ({ user, reserve, payType, setPayType }) => {
 
           <S.PayRow onClick={() => setPayType("KAKAO")}>
             <S.PayLeft>
-              <S.PayIcon aria-hidden>pay</S.PayIcon>
+              <S.PayIcon aria-hidden>
+                <S.PayIconImg
+                  src="/assets/images/payment/kakaoPay_Icon.png"
+                  alt="카카오페이"
+                  data-pay="kakao"
+                />
+              </S.PayIcon>
               <S.PayText>카카오페이</S.PayText>
             </S.PayLeft>
 
