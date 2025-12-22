@@ -7,14 +7,7 @@ import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
 import { PickersDay } from "@mui/x-date-pickers/PickersDay";
 import styled from "styled-components";
 
-const MAX_CAPACITY = 30;
-
-const reservationCountByDate = {
-  "2024-12-14": 5,
-  "2024-12-15": 17,
-  "2024-12-16": 30,
-  "2024-12-17": 22,
-};
+/* ================= 스타일 ================= */
 
 const CalendarWrapper = styled.div`
   width: 100%;
@@ -52,11 +45,21 @@ const CountText = styled.div`
   pointer-events: none;
 `;
 
+/* ================= 커스텀 Day ================= */
+
 function CustomDay(props) {
-  const { day, outsideCurrentMonth, ...other } = props;
+  const {
+    day,
+    outsideCurrentMonth,
+    reserveType,
+    maxCapacity,
+    dateCountMap,
+    ...other
+  } = props;
+
   const key = day.format("YYYY-MM-DD");
-  const count = reservationCountByDate[key] || 0;
-  const isFull = count >= MAX_CAPACITY;
+  const count = dateCountMap[key] ?? 0;
+  const isFull = count >= maxCapacity;
 
   return (
     <DayContainer>
@@ -64,38 +67,44 @@ function CustomDay(props) {
         {...other}
         day={day}
         outsideCurrentMonth={outsideCurrentMonth}
-        sx={{ width: 36, height: 36, borderRadius: "8px" }}
+        sx={{
+          width: 36,
+          height: 36,
+          borderRadius: "8px",
+        }}
       />
-      {!outsideCurrentMonth && (
+
+      {/* ✅ PARKING일 때만 숫자 표시 */}
+      {!outsideCurrentMonth && reserveType === "PARKING" && (
         <CountText $full={isFull}>
-          {count}/{MAX_CAPACITY}
+          {count}/{maxCapacity}
         </CountText>
       )}
     </DayContainer>
   );
 }
 
+/* ================= 메인 캘린더 ================= */
+
 const ReservationCalendar = ({
-  startDate,
-  endDate,
-  setStartDate,
-  setEndDate,
+  selectedDate,
+  onSelectDate,
+  reserveType,              
+  unavailableDates = [],
+  maxCapacity,
+  dateCountMap = {},
 }) => {
   const today = dayjs().startOf("day");
   const maxDate = dayjs().add(1, "month").endOf("day");
 
   const handleChange = (newDate) => {
-    if (!startDate || endDate) {
-      setStartDate(newDate);
-      setEndDate(null);
-      return;
-    }
-    if (newDate.isBefore(startDate)) {
-      setEndDate(startDate);
-      setStartDate(newDate);
-    } else {
-      setEndDate(newDate);
-    }
+    if (!newDate) return;
+
+    const dateKey = newDate.format("YYYY-MM-DD");
+
+    if (reserveType === "PLACE" && unavailableDates.includes(dateKey)) return;
+
+    onSelectDate(newDate.toDate());
   };
 
   return (
@@ -103,13 +112,23 @@ const ReservationCalendar = ({
       <CalendarWrapper>
         <StaticDatePicker
           displayStaticWrapperAs="desktop"
-          value={startDate}
+          value={selectedDate ? dayjs(selectedDate) : null}
           onChange={handleChange}
           minDate={today}
           maxDate={maxDate}
           disablePast
           showToolbar={false}
-          slots={{ actionBar: () => null, day: CustomDay }}
+          slots={{
+            actionBar: () => null,
+            day: (props) => (
+              <CustomDay
+                {...props}
+                reserveType={reserveType}
+                maxCapacity={maxCapacity}
+                dateCountMap={dateCountMap}
+              />
+            ),
+          }}
         />
       </CalendarWrapper>
     </LocalizationProvider>

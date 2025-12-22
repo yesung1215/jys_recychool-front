@@ -1,56 +1,61 @@
 import styled from "styled-components";
-import {
-  flexCenterRow,
-  h2Bold
-} from "../../styles/common";
+import { flexCenterRow, h2Bold } from "../../styles/common";
 
 const S = {};
 
-
+/* 페이지 */
 S.Page = styled.div`
   width: 100%;
 `;
 
-S.Grid = styled.div`
+/* 헤더와 동일 기준 */
+S.Container = styled.div`
   width: 100%;
-  max-width: 1400px;
+  max-width: 1160px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  column-gap: 40px;
 `;
 
-S.LeftPanel = styled.div`
-  grid-column: 1 / span 5;
-`;
-
-S.LeftContent = styled.div`
+/* 좌우 레이아웃 */
+S.ContentRow = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
 `;
 
+/* 좌측 */
+S.LeftPanel = styled.div`
+  width: 560px;   /* ← 핵심 */
+`;
+
+/* 우측 */
 S.RightPanel = styled.div`
-  grid-column: 7 / span 4;
+  width: 460px;
   margin-top: 60px;
 `;
 
+/* 지도 */
 S.MapSection = styled.div`
-  grid-column: 1 / 11;
   margin-top: 80px;
-  height: 420px;
+
+  height: 520px;          
+  min-height: 520px;
+
   background-color: ${({ theme }) => theme.PALETTE.neutral.gray.light};
   border-radius: 12px;
+
+  overflow: hidden;      
+  margin-bottom: 120px; 
 `;
 
+/* 이하 기존 그대로 */
 S.Title = styled.h2`
   ${h2Bold};
   margin-bottom: 16px;
-  color: ${({ theme }) => theme.PALETTE.neutral.black.main};
 `;
 
 S.ImageBox = styled.div`
   width: 100%;
-  height: 340px;
+  height: 300px;
   background-color: ${({ theme }) => theme.PALETTE.neutral.gray.light};
   border-radius: 12px;
   margin-bottom: 32px;
@@ -58,10 +63,10 @@ S.ImageBox = styled.div`
 
 S.CalendarBox = styled.div`
   width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
   background-color: ${({ theme }) => theme.PALETTE.primary.green.light};
   border-radius: 12px;
-  padding: 12px;         
-  box-sizing: border-box;
 `;
 
 S.InfoRow = styled.div`
@@ -70,21 +75,14 @@ S.InfoRow = styled.div`
   margin-bottom: ${({ $last }) => ($last ? "40px" : "24px")};
 
   span {
-    font-size: ${({ theme }) => theme.FONT_SIZE.h5};
-    font-weight: ${({ theme }) => theme.FONT_WEIGHT.medium};
-    color: ${({ theme }) => theme.PALETTE.neutral.gray.main};
-    min-width: 80px;
+    min-width: 90px;
     line-height: 3;
   }
 
   p {
-    font-size: ${({ theme }) => theme.FONT_SIZE.h5};
-    font-weight: ${({ theme }) => theme.FONT_WEIGHT.light};
-    color: ${({ theme }) => theme.PALETTE.neutral.black.main};
-    margin: 0;
     text-align: right;
-    flex: 1;
     line-height: 3;
+    margin: 0;
   }
 `;
 
@@ -94,19 +92,7 @@ S.ReserveButton = styled.button`
   height: 48px;
   border-radius: 8px;
   background-color: ${({ theme }) => theme.PALETTE.primary.green.main};
-  color: ${({ theme }) => theme.PALETTE.neutral.white.main};
-  font-size: ${({ theme }) => theme.FONT_SIZE.h5};
-  font-weight: ${({ theme }) => theme.FONT_WEIGHT.bold};
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    background-color: ${({ theme }) => theme.PALETTE.neutral.gray.light};
-    color: ${({ theme }) => theme.PALETTE.neutral.gray.dark};
-    cursor: not-allowed;
-  }
+  color: white;
 `;
 
 export default S;

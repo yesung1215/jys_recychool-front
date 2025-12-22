@@ -1,74 +1,80 @@
-import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import LeftPanel from "./components/LeftPanel";
+import RightPanel from "./components/RightPanel";
+import ReserveMap from "./components/ReserveMap";
 import S from "./style";
-import ReservationCalendar from "./components/ReservationCalendar";
 
-const Reserve = () => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+const fetchReservePage = async ({ queryKey }) => {
+  const [, schoolId, reserveType] = queryKey;
+
+  const res = await fetch(
+    `${process.env.REACT_APP_BACKEND_URL}/api/public/schools/${schoolId}/${reserveType.toLowerCase()}`
+  );
+
+  if (!res.ok) {
+    throw new Error("예약 페이지 조회 실패");
+  }
+
+  return res.json();
+};
+
+const Reserve = ({ reserveType }) => {
+  const { schoolId } = useParams();
+
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [coord, setCoord] = useState(null);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["reservePage", schoolId, reserveType],
+    queryFn: fetchReservePage,
+  });
+
+  const reserveData = data?.data;
+
+  useEffect(() => {
+    if (!reserveData?.schoolName) return;
+
+    fetch("/data/school_lat_lng.json")
+      .then((res) => res.json())
+      .then((list) => {
+        const found = list.find(
+          (item) => item.title === reserveData.schoolName
+        );
+
+        if (found) {
+          setCoord({ lat: found.lat, lng: found.lng });
+        }
+      });
+  }, [reserveData]);
+
+  if (isLoading) return <div>로딩중...</div>;
+  if (isError) return <div>에러 발생</div>;
 
   return (
     <S.Page>
-      <S.Grid>
-        <S.LeftPanel>
-          <S.LeftContent>
-            <S.Title>영월초등학교</S.Title>
+      <S.Container>
+        <S.ContentRow>
+          <LeftPanel
+            data={reserveData}
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+          />
 
-            <S.ImageBox />
+          <RightPanel
+            data={reserveData}
+            type={reserveType}
+            selectedDate={selectedDate}
+          />
+        </S.ContentRow>
 
-            <S.CalendarBox>
-              <ReservationCalendar
-                startDate={startDate}
-                endDate={endDate}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-              />
-            </S.CalendarBox>
-
-          </S.LeftContent>
-        </S.LeftPanel>
-
-        <S.RightPanel>
-          <S.InfoRow>
-            <span>도로명 주소</span>
-            <p>경기도 포천시 영중면 영평로1429번길5</p>
-          </S.InfoRow>
-
-          <S.InfoRow>
-            <span>면적</span>
-            <p>4993㎡</p>
-          </S.InfoRow>
-
-          <S.InfoRow>
-            <span>연락처</span>
-            <p>031-539-0033</p>
-          </S.InfoRow>
-
-          <S.InfoRow>
-            <span>사용료</span>
-            <p>50,000원/월</p>
-          </S.InfoRow>
-
-          <S.InfoRow>
-            <span>이용 시간</span>
-            <p>18:00 ~ 08:00(익일)</p>
-          </S.InfoRow>
-
-          <S.InfoRow $last>
-            <span>날짜</span>
-            <p>
-              {startDate && endDate
-                ? `${startDate.format("MM월 DD일")} ~ ${endDate.format(
-                    "MM월 DD일"
-                  )}`
-                : "날짜를 선택하세요"}
-            </p>
-          </S.InfoRow>
-
-          <S.ReserveButton>예약하기</S.ReserveButton>
-        </S.RightPanel>
-
-        <S.MapSection />
-      </S.Grid>
+        <S.MapSection>
+          {coord && (
+            <ReserveMap lat={coord.lat} lng={coord.lng} />
+          )}
+        </S.MapSection>
+      </S.Container>
     </S.Page>
   );
 };
