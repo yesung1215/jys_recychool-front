@@ -25,6 +25,7 @@ import FindPasswordComplete from "../pages/find/find-password/complete/FindPassw
 import Movie from "../pages/movie/Movie";
 import MyPage from "../pages/mypage/MyPage";
 import CompleteConfirm from "../pages/payment/CompleteConfirm";
+import MovieReservation from "../pages/movie/reservation/MovieReservation";
 
 
 const router = createBrowserRouter([
@@ -124,6 +125,10 @@ const router = createBrowserRouter([
       {
         path: "complete/:reserveId",
         element: <CompleteConfirm />
+      },
+      {
+        path: "movie/reservation",
+        element: <MovieReservation />
       }
     ],
   },
