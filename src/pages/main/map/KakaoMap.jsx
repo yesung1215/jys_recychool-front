@@ -339,8 +339,9 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
             <KMap
                 center={memoCenter}
                 style={{ width: '100%', height: '100%' }}
-                level={9}
+                level={12}
                 onCreate={onMapCreate}
+
             >
                 {memoFeatures.map(({ ring, props }, idx) => {
                     const name = props?.SIG_KOR_NM ?? props?.name ?? `SGG-${idx}`;

@@ -2,6 +2,9 @@ import React from "react";
 import S from "./style";
 
 const PaymentForm = ({ user, reserve, payType, setPayType }) => {
+
+  console.log(user)
+
   return (
     <S.LeftWrap>
       {/* 이용자 정보 */}

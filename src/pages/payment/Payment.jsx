@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import S from "./style";
 import PaymentForm from "./PaymentForm";
 import PaymentSummary from "./PaymentSummary";
@@ -7,14 +8,24 @@ import * as PortOne from "@portone/browser-sdk/v2";
 
 const Payment = () => {
   const [payType, setPayType] = useState("GENERAL");
-  const [user, setUser] = useState(null);
   const [school, setSchool] = useState(null);
   const [reserve, setReserve] = useState(null);
 
   const { reserveId } = useParams();
 
-  useEffect(() => {
 
+  const reduxUser = useSelector((state) => state.user.currentUser);
+  console.log(reduxUser)
+
+  const user = useMemo(() => {
+    return {
+      name: reduxUser?.userName ?? "",
+      email: reduxUser?.userEmail ?? "",
+      phone: reduxUser?.userPhone ?? "",
+    };
+  }, [reduxUser]);
+
+  useEffect(() => {
     const getReserve = async () => {
       const res = await fetch(
         `${process.env.REACT_APP_BACKEND_URL}/private/payment/page?reserveId=${reserveId}`,
@@ -31,37 +42,32 @@ const Payment = () => {
         return;
       }
 
-      const json = await res.json();     
-      const dto = json.data;            
+      const json = await res.json();
+      const dto = json.data;
 
-      setUser({                         
-        name: dto.userName,
-        email: dto.userEmail,
-        phone: dto.userPhone,
-      });
 
-      setSchool({                       
+      setSchool({
         name: dto.schoolName,
         address: dto.schoolAddress,
       });
 
-      setReserve({                   
-        id: dto.reserveId,   
+      setReserve({
+        id: dto.reserveId,
         reserveType: dto.reserveType,
         startDate: dto.startDate,
-        amount: dto.amount, 
+        amount: dto.amount,
       });
     };
 
-    getReserve(); 
-  }, [reserveId]); 
+    getReserve();
+  }, [reserveId]);
 
   const totalPrice = useMemo(() => {
-    if (!reserve) return 0; 
-    return reserve.amount ?? (reserve.reserveType === "PARKING" ? 30000 : 50000);
+    if (!reserve) return 0;
+    return reserve.amount ?? (reserve.reserveType === "PARKING" ? 300 : 500);
   }, [reserve]);
 
-  if (!user || !school || !reserve) return null;
+  if (!reduxUser || !school || !reserve) return null;
 
   const getPortOnePayType = () => {
     if (payType === "GENERAL") {
@@ -110,6 +116,7 @@ const Payment = () => {
         currency: "CURRENCY_KRW",
         payMethod,
         customer: {
+
           fullName: user.name,
           email: user.email,
           phoneNumber: String(user.phone ?? ""),
@@ -127,7 +134,7 @@ const Payment = () => {
         return;
       }
 
-      const impUid = response.paymentId;
+      const impUid = response.paymentId; 
       const merchantUid = paymentId;
 
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/payment/complete`, {
@@ -152,6 +159,11 @@ const Payment = () => {
       const serverData = await res.json();
       console.log("서버 결제 완료 응답:", serverData);
       alert("결제가 완료되었습니다.");
+
+
+      
+
+
     } catch (error) {
       console.error("결제 실패:", error);
       alert("결제가 실패(또는 취소)되었습니다.");
@@ -162,11 +174,21 @@ const Payment = () => {
     <S.Page>
       <S.Grid>
         <S.Left>
-          <PaymentForm user={user} reserve={reserve} payType={payType} setPayType={setPayType} />
+          <PaymentForm
+            user={user}
+            reserve={reserve}
+            payType={payType}
+            setPayType={setPayType}
+          />
         </S.Left>
 
         <S.Right>
-          <PaymentSummary school={school} reserve={reserve} totalPrice={totalPrice} onClickPay={handlePay} />
+          <PaymentSummary
+            school={school}
+            reserve={reserve}
+            totalPrice={totalPrice}
+            onClickPay={handlePay}
+          />
         </S.Right>
       </S.Grid>
     </S.Page>

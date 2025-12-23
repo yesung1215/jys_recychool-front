@@ -52,7 +52,7 @@ const RightPanel = ({ data, type, selectedDate }) => {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify({
-            startDate: selectedDate.toISOString().slice(0, 10),
+            startDate: selectedDate.toLocaleDateString("sv-SE"),
           }),
         }
       );
