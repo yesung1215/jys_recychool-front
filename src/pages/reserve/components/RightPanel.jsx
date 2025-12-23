@@ -83,7 +83,7 @@ const RightPanel = ({ data, type, selectedDate }) => {
   return (
     <S.RightPanel>
       <S.InfoRow>
-        <span>도로명 주소</span>
+        <span>주소</span>
         <p>{data.schoolAddress}</p>
       </S.InfoRow>
 

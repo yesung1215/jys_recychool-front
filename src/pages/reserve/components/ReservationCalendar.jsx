@@ -58,8 +58,11 @@ function CustomDay(props) {
   } = props;
 
   const key = day.format("YYYY-MM-DD");
-  const count = dateCountMap[key] ?? 0;
-  const isFull = count >= maxCapacity;
+
+  const rawCount = dateCountMap[key] ?? 0;
+  const displayCount = Math.floor(Number(rawCount));
+  const displayMax = Math.floor(Number(maxCapacity ?? 0));
+  const isFull = displayCount >= displayMax;
 
   return (
     <DayContainer>
@@ -77,7 +80,7 @@ function CustomDay(props) {
       {/* ✅ PARKING일 때만 숫자 표시 */}
       {!outsideCurrentMonth && reserveType === "PARKING" && (
         <CountText $full={isFull}>
-          {count}/{maxCapacity}
+          {displayCount}/{displayMax}
         </CountText>
       )}
     </DayContainer>
@@ -89,7 +92,7 @@ function CustomDay(props) {
 const ReservationCalendar = ({
   selectedDate,
   onSelectDate,
-  reserveType,              
+  reserveType,
   unavailableDates = [],
   maxCapacity,
   dateCountMap = {},
