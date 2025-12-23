@@ -11,6 +11,9 @@ const InfoCard = ({ selected }) => {
                                     fontWeight: '700', 
                                     fontSize: '20px'}}>지도를 클릭하면 정보가 표시됩니다.</S.InfoCard>
     }
+    const imgPath = selected.raw.schoolImagePath;
+    const imgName = selected.raw.schoolImageName;
+    const imgSrc = `http://localhost:10000/images/${encodeURIComponent(imgName)}`;
     return (
         <div>
             <S.InfoCard>
@@ -22,7 +25,7 @@ const InfoCard = ({ selected }) => {
             </S.InfoHeaderWrap>
             {/* 인포카드 중앙사진 */}
             <S.InfoCardMiddleWrap>
-                <img src={selected.image || '/assets/images/schoolsample.png'} alt={selected.title || '미원초엄소분교장 1'}></img>
+                {imgName ? <img src={imgSrc} alt={selected.title || '미원초엄소분교장 1'} /> : <p>이미지가 존재하지 않습니다.</p> }
             </S.InfoCardMiddleWrap>
             {/* 인포카드 학교정보보 */}
             <S.InfoCardFloorWrap>

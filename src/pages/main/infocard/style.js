@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { h5Bold, h6Bold, h6Medium } from "../../../styles/common";
+import { h3Bold, h4Bold, h5Bold, h6Bold, h6Medium } from "../../../styles/common";
 import { Link } from "react-router-dom";
 
 const S = {};
@@ -36,6 +36,14 @@ S.InfoCardMiddleWrap = styled.div`
     img {
         width: 296px;
         height: 135px;
+    }
+    p {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 296px;
+        height: 135px;
+        ${h4Bold}
     }
 `
 S.InfoCardFloorWrap = styled.div`

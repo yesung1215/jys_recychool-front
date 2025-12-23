@@ -5,6 +5,7 @@ import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
 import ReserveMap from "./components/ReserveMap";
 import S from "./style";
+import MainBanner from "../main/mainbanner/MainBanner";
 
 const fetchReservePage = async ({ queryKey }) => {
   const [, schoolId, reserveType] = queryKey;

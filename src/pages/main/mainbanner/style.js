@@ -40,22 +40,24 @@ S.SidePane = styled.div`
     align-items: center;
 `
 
-S.IsClosedSchoolWrap = styled.div`
+S.IsClosedSchoolWrap = styled(Link)`
     display: flex;
     align-items: center;
     justify-content: center;
     width: 330px;
     height: 61px;
     background-color: #6578F7;
-    color: #FFFFFF;
     margin: 35px 0 0 0;
     border-radius: 18px;
     gap: 12px;
-    ${h6Bold}
     img {
         width: 18px;
         height: 18px;
         margin: 22px 0px 22px 22px;
+    }
+    p {
+        color: #FFFFFF;
+            ${h6Bold}
     }
 `
 

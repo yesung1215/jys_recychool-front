@@ -74,6 +74,10 @@ function buildBoundaryEdges(rings, precision = 6) {
     return { internalEdges, outerEdges };
 }
 
+const Spinner = () => {
+    <div style={{ textAlign: 'center', color: '#666' }}>지도 로딩중...</div>
+}
+
 const KakaoMap = ({ schoolRing = [], onSelect }) => {
 
     const [features, setFeatures] = useState([]);
@@ -81,20 +85,50 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
     const [outerEdges, setOuterEdges] = useState([]);
     const [selected, setSelected] = useState(null);
     const [hoverId, setHoverId] = useState(null);
-    // const [schoolRings, setSchoolRings] = useState([]);
+    const [modal, setModal] = useState('')
     const mapRef = useRef(null);
 
-    
-                    const normalSrc = '/assets/images/pink.png';
-                    const hoverSrc = '/assets/images/blue_marker.png';
-                    const selectedSrc = '/assets/images/blue_marker.png';
 
-                    const makeImage = (src, size) => ({ src, size: { width: size, height: size } });
+    const onMapCreate = useCallback((map) => {
+        mapRef.current = map;
 
+        try {
+            map.setDraggable(true);
+            map.setZoomable(true);
+            map.setMinLevel(7);
+            map.setMaxLevel(11)
+        } catch (e) {
+            console.warn('맵 생성 에러', e);
+        }
+    }, []);
+
+    useEffect(() => {
+        if(!mapRef.current) return;
+        if(!Array.isArray(features) || features.length === 0) return;
+
+        const { kakao } = window;
+        const bounds = new kakao.maps.LatLngBounds();
+        features.forEach(({ ring }) => {
+            ring.forEach((ring) => bounds.extend(new kakao.maps.LatLng(ring.lat, ring.lng)));
+        });
+
+        try {
+            mapRef.current.setBounds(bounds);
+        } catch(e) {
+            console.warn('바운딩 실패', e);
+        }
+    }, [features]);
+
+    const normalSrc = '/assets/images/pink.png';
+    const hoverSrc = '/assets/images/blue_marker.png';
+    const selectedSrc = '/assets/images/blue_marker.png';
+
+    const iwContent = '<div style="padding:5px;">Hello World!</div>';
     const handleMarkerMouseOver = useCallback((id, e) => {
         e?.stopPropagation?.();
         setHoverId(id);
     }, []);
+
 
     const handleMarkerMouseOut = useCallback((e) => {
         e?.stopPropagation?.();
@@ -110,15 +144,9 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
             image: school.raw.schoolImagePath,
             raw: school.raw
         });
-    }, [onSelect]);
-
-    const fetchJson = async (url) => {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`${url} 불러오기 실패: ${res.status}`);
-        return res.json();
-    }
-
-
+        setSelected(prev => (prev?.id === school.raw.id ? null : school.raw));
+        
+    }, []);
     const getPolygons = async () => {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/polygons/find`)
         if (!response.ok) throw new Error("불러오기 실패");
@@ -197,28 +225,6 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
         retry: 1
     })
 
-    // useEffect(() => {
-    //     (async () => {
-    //         try {
-    //             const res = await fetch('/data/school_lat_lng.json');
-    //             if (!res.ok) throw new Error(`학교 좌표를 찾을 수 없습니다 : ${res.status}`);
-    //             const datas = await res.json();
-    //             if (Array.isArray(datas)) {
-    //                 setSchoolRings(
-    //                     datas
-    //                         .filter(data => typeof data.lat === 'number' && typeof data.lng === 'number')
-    //                         .map(data => ({ title: data.title ?? '학교', lat: data.lat, lng: data.lng }))
-    //                 );
-    //             } else {
-    //                 console.error(`학교 좌표는 JSON 배열이어야 합니다. 현재 : ${datas} `)
-    //             }
-
-    //         } catch (e) {
-    //             console.error(e)
-    //         }
-    //     })();
-    // }, [])
-
     const center = useMemo(() => {
         const all = features.flatMap((f) => Array.isArray(f?.ring) ? f.ring : []);
         if (!all.length) return { lat: 37.5665, lng: 126.9780 };
@@ -226,21 +232,6 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
         const lng = all.reduce((s, p) => s + p.lng, 0) / (all.length || 1);
         return { lat: lat || 37.5665, lng: lng || 126.9780 };
     }, [features]);
-
-    const onMapCreate = (map) => {
-        mapRef.current = map;
-        if (!features.length) return;
-        const { kakao } = window;
-        const bounds = new kakao.maps.LatLngBounds();
-        features.forEach(({ ring }) => {
-            ring.forEach((p) => bounds.extend(new kakao.maps.LatLng(p.lat, p.lng)));
-        });
-        map.setBounds(bounds);
-        map.setDraggable(true);
-        map.setZoomable(true);
-        map.setMinLevel(7);
-        map.setMaxLevel(11)
-    };
 
     function buildOuterEdgesForGroup(rings, precision = 6) {
         const fmt = (p) =>
@@ -305,17 +296,53 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
     }, [features])
 
     const memoCenter = useMemo(() => center, [center.lat, center.lng]);
+    const memoFeatures = useMemo(() => features, [features?.length]);
+    const memoSchoolRings = useMemo(() => schoolRings, [schoolRings?.length]);
+    const memoInternalEdges = useMemo(() => internalEdges, [internalEdges?.length]);
+    const memoMaskHoles = useMemo(() => maskHoles, [maskHoles?.length]);
+    const memoKoreaMaskOuterRing = useMemo(() => koreaMaskOuterRing, [koreaMaskOuterRing?.length]);
+    const memoSeoulOuterEdges = useMemo(() => seoulOuterEdges, [seoulOuterEdges?.length]);
+    const memoGgOuterEdges = useMemo(() => ggOuterEdges, [ggOuterEdges?.length]);
 
-    console.log('KMap props', { features, schoolRings, center});
+    const [ready, setReady] = useState(false);
+
+    useEffect(() => {
+        if (!Array.isArray(memoFeatures) || memoFeatures.length === 0) {
+            setReady(false);
+            return;
+        }
+
+        let raf = null;
+        let time = null;
+
+        raf = requestAnimationFrame(() => {
+            time = setTimeout(() => setReady(true), 0);
+        });
+
+        return () => {
+            if (raf) cancelAnimationFrame(raf);
+            if (time) clearTimeout(time);
+        };
+    }, [memoFeatures]);
+
+    if (!ready) {
+        return (
+            <S.MapWrap style={{ width: 550, height: 550 }}>
+                <Spinner />
+            </S.MapWrap>
+        );
+    }
+
     return (
         <S.MapWrap style={{ width: 550, height: 550 }}>
+
             <KMap
                 center={memoCenter}
                 style={{ width: '100%', height: '100%' }}
                 level={9}
                 onCreate={onMapCreate}
             >
-                {features.map(({ ring, props }, idx) => {
+                {memoFeatures.map(({ ring, props }, idx) => {
                     const name = props?.SIG_KOR_NM ?? props?.name ?? `SGG-${idx}`;
                     const code = props?.SIG_CD ?? props?.code ?? '';
                     const seoulColor = String(props?.CTPRVN_CD ?? props?.code ?? '').startsWith('11')
@@ -325,7 +352,6 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
                             path={ring}
                             strokeWeight={0.8}
                             strokeColor='#FFFFFF'
-
                             strokeOpacity={0.9}
                             fillColor={seoulColor ? '#FFEFFA' : '#EFFBEA'}
                             fillOpacity={0.85}
@@ -334,7 +360,7 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
                     )
                 })}
 
-                {internalEdges.map((seg, idx) => (
+                {memoInternalEdges.map((seg, idx) => (
                     <Polyline
                         key={`edge-in-${idx}`}
                         path={seg}
@@ -344,16 +370,16 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
                         zIndex={10}
                     />
                 ))}
-                {maskHoles.length > 0 && (
+                {memoMaskHoles.length > 0 && (
                     <Polygon
-                        path={[koreaMaskOuterRing, ...maskHoles]}
+                        path={[memoKoreaMaskOuterRing, ...memoMaskHoles]}
                         strokeWeight={0}
                         fillColor='#DFE4EA'
                         fillOpacity={1}
                         zIndex={5}
                     />
                 )}
-                {seoulOuterEdges.map((seg, idx) => (
+                {memoSeoulOuterEdges.map((seg, idx) => (
                     <Polyline
                         key={`edge-seoul-${idx}`}
                         path={seg}
@@ -363,7 +389,7 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
                         zIndex={20}
                     />
                 ))}
-                {ggOuterEdges.map((seg, idx) => (
+                {memoGgOuterEdges.map((seg, idx) => (
                     <Polyline
                         key={`edge-gg-${idx}`}
                         path={seg}
@@ -373,13 +399,11 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
                         zIndex={20}
                     />
                 ))}
-                {schoolRings.map((school, idx) => {
+                {memoSchoolRings.map((school, idx) => {
                     const id = school.raw?.id ?? `school-${idx}`;
                     const isSelected = selected?.id === id;
                     const isHovered = hoverId === id;
-
-
-                    const size = isSelected ? 14 : isHovered ? 12 : 10;
+                    const size = isSelected ? 16 : isHovered ? 14 : 12;
                     const src = isSelected ? selectedSrc : isHovered ? hoverSrc : normalSrc;
 
                     const image = { src, size: { width: size, height: size } };
@@ -390,19 +414,9 @@ const KakaoMap = ({ schoolRing = [], onSelect }) => {
                             position={{ lat: school.lat, lng: school.lng }}
                             title={school.title}
                             image={image}
-                            onMouseOver={() => handleMarkerMouseOver(id)}
-                            onMouseOut={(e) => { e?.stopPropagation?.(); handleMarkerMouseOut() }}
-                            onClick={(e) => {
-                                e?.stopPropagation?.();
-                                onSelect?.({
-                                    id: school.raw.id,
-                                    title: school.title,
-                                    address: school.raw.schoolAddress,
-                                    phone: school.raw.schoolPhone,
-                                    image: school.raw.schoolImagePath,
-                                    raw: school.raw
-                                })
-                            }}
+                            onMouseOver={(e) => handleMarkerMouseOver(id, e)}
+                            onMouseOut={(e) => handleMarkerMouseOut(id, e)}
+                            onClick={(e) => handleMarkerClick(school, e)}
                         />
                     )
                 }

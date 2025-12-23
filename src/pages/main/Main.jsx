@@ -16,7 +16,6 @@ const Main = () => {
     <div>
       <S.MainWrap>
         <MainBanner />
-        <MainCategorySide />
       </S.MainWrap>
       <FloatingButton />
     </div>
