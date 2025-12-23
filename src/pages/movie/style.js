@@ -33,8 +33,38 @@ S.MapPane = styled.div`
   height: 590px;
   border-radius: 16px;
   overflow: hidden;
+  position: relative;
 `;
-
+S.MapPin1 = styled.div`
+  position: absolute; 
+  transform: translate(800%, -1850%); 
+  z-index: 2;
+  img {
+    width: 28px;   
+    height: 28px;
+    display: block;
+  }
+`;
+S.MapPin2 = styled.div`
+  position: absolute; 
+  transform: translate(590%, -1185%); 
+  z-index: 2;
+  img {
+    width: 28px;   
+    height: 28px;
+    display: block;
+  }
+`;
+S.MapPin3 = styled.div`
+  position: absolute; 
+  transform: translate(850%, -380%); 
+  z-index: 2;
+  img {
+    width: 28px;   
+    height: 28px;
+    display: block;
+  }
+`;
 S.SidePane = styled.div`
   flex: 1 1 auto;
   display: flex;
@@ -60,7 +90,7 @@ S.InfoHeaderLeft = styled.div`
   height: 30px;
   margin: 20px 0px 0px 16px;
   border-radius: 20px;
-  background-color: #2993F7;
+  background-color: ${({ theme }) => theme.PALETTE.secondary.blue.main};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -102,7 +132,7 @@ S.InfoCardMovie = styled.div`
 S.InfoCardTitle = styled.div`
   margin: 20px 0px 0px 0px;
   ${h6Medium}
-  color: #222;
+  color:${({ theme }) => theme.PALETTE.neutral.black.main};
 `;
 
 S.ReservationCard = styled.div`
@@ -128,12 +158,12 @@ S.ReservationDot = styled.div`
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #70C60C;
+  background: ${({ theme }) => theme.PALETTE.primary.green.main};
 `;
 
 S.ReservationTitle = styled.div`
   ${h5Bold}
-  color: #222;
+  color:${({ theme }) => theme.PALETTE.neutral.black.main};
 `;
 
 S.ReservationBody = styled.div`
@@ -158,7 +188,7 @@ S.ReservationLabel = styled.span`
 
 S.ReservationValue = styled.span`
   ${h7Medium}
-  color: #222;
+  color:${({ theme }) => theme.PALETTE.neutral.black.main};
 `;
 
 S.ReservationSelect = styled.select`
@@ -168,15 +198,23 @@ S.ReservationSelect = styled.select`
   border-radius: 8px;
   padding: 0 10px;
   ${h7Medium}
-  color: #222;
+  color:${({ theme }) => theme.PALETTE.neutral.black.main};
   background: #fff;
   outline: none;
 `;
+S.Reservation = styled.span`
+  display: flex;
+`;
 
 S.ReservationSeat = styled.span`
-  ${h7Medium}
-  color: #2993F7;
+  ${h7Bold}
+  color: ${({ theme }) => theme.PALETTE.secondary.blue.main};
 `;
+
+S.ReservationAll = styled.span`
+  ${h7Medium}
+`;
+
 
 S.ReservationButton = styled.button`
   margin-top: 12px;
@@ -184,14 +222,15 @@ S.ReservationButton = styled.button`
   height: 38px;
   border: none;
   border-radius: 10px;
-  background: #70C60C;
+  background-color: ${({ theme }) => theme.PALETTE.primary.green.main};
   color: #fff;
   ${h7Bold}
   cursor: pointer;
 
   &:disabled {
-    opacity: 0.6;
+    background-color: ${({ theme }) => theme.PALETTE.secondary.pink.main};
     cursor: default;
+
   }
 `;
 
@@ -212,7 +251,7 @@ S.SchoolInfo = styled.div`
 S.ListTitle = styled.h2`
   margin: 38px;
   ${h4Bold}
-  color: #222;
+  color: ${({ theme }) => theme.PALETTE.neutral.black.main};
   margin-bottom: 24px;
 `;
 
@@ -227,7 +266,7 @@ S.Card = styled.div`
   width: 330px;
   height: 380px;
   border-radius: 20px;
-  background: #fff;
+  background: ${({ theme }) => theme.PALETTE.neutral.white.main};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 20px;
   box-sizing: border-box;
@@ -247,7 +286,6 @@ S.CardIcon = styled.div`
   img {
     width: 28px;
     height: 30px;
-  
   }
 `;
 
@@ -270,7 +308,7 @@ S.CardImg = styled.div`
 
 S.SchoolName = styled.div`
   ${h5Bold}
-  color: #222;
+  color: ${({ theme }) => theme.PALETTE.neutral.black.main};
   margin-bottom: 8px;
 `;
 
@@ -278,7 +316,7 @@ S.InfoLine = styled.div`
   display: flex;
   align-items: flex-start;
   ${h6Medium}
-  color: #666666;
+  color: ${({ theme }) => theme.PALETTE.neutral.black.secondary};
   margin-bottom: 6px;
   
   img {

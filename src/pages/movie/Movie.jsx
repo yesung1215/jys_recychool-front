@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import S from './style';
+import { useSelector } from "react-redux";
 
 const Movie = () => {
   const API = process.env.REACT_APP_BACKEND_URL;
+  const currentUser = useSelector((state) => state.user?.currentUser);
+  const userId = currentUser?.id;
 
   const [schools, setSchools] = useState([]);
   const [selectedSchoolId, setSelectedSchoolId] = useState(null);
-  const [remainingSeats, setRemainingSeats] = useState(null);
+  const [remainingSeats, setRemainingSeats] = useState(null); // 여기서는 '현재 예약된 좌석 수'로 사용
   const [countLoading, setCountLoading] = useState(false);
 
-  // 1) 학교 목록 조회
+  // 영화 정보를 담을 state
+  const [movies, setMovies] = useState([]); 
+
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  };
+
+  // 1) 학교 목록 및 영화 목록 조회
   useEffect(() => {
     const fetchSchools = async () => {
       try {
@@ -27,10 +40,24 @@ const Movie = () => {
         setSchools([]);
       }
     };
-    fetchSchools();
-  }, []);
 
-  // 2) 학교 선택될 때마다: 잔여좌석 조회
+    const fetchMovies = async () => {
+        try {
+            const res = await fetch(`${API}/movies/this-month`); 
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setMovies(data);
+            }
+        } catch (e) {
+            console.error("영화 정보 조회 실패:", e);
+        }
+    };
+
+    fetchSchools();
+    fetchMovies(); 
+  }, [API]);
+
+  // 2) 학교 선택될 때마다: 예약된 좌석 수 조회
   const fetchRemainingSeats = async () => {
     if (selectedSchoolId == null) return;
     
@@ -39,7 +66,8 @@ const Movie = () => {
       const res = await fetch(`${API}/reservations/count/${selectedSchoolId}`);
       const json = await res.json();
       if (!res.ok) throw new Error('좌석 조회 실패');
-      setRemainingSeats(Number(json.data)-1);
+      // API가 반환하는 값이 "현재 예약된 숫자"라고 가정
+      setRemainingSeats(Number(json.data) - 1);
     } catch (e) {
       console.error(e);
       setRemainingSeats(null);
@@ -52,34 +80,48 @@ const Movie = () => {
     fetchRemainingSeats();
   }, [selectedSchoolId]);
 
+  const targetMovie = movies.length > 0 ? movies[0] : null;
+  const isSoldOut = targetMovie && remainingSeats !== null 
+    ? remainingSeats >= targetMovie.moviePeopleAll 
+    : false;
 
   const handleReservation = async () => {
+    if (!userId) {
+      alert("로그인이 필요합니다!");
+      return;
+    }
+
     if (!selectedSchoolId) {
       alert("학교를 먼저 선택해주세요!");
       return;
     }
 
+    const titleToReserve = targetMovie ? targetMovie.movieTitle : "영화 미정";
+
     try {
-      // 쿼리 파라미터 방식으로 전송
-      const params = new URLSearchParams({
-        schoolId: selectedSchoolId,
-        movieTitle: "코렐라인",
-        userId: "1"
+      const movieTitle = encodeURIComponent(titleToReserve);
+      const url = `${API}/reservations/write?schoolId=${selectedSchoolId}&movieTitle=${movieTitle}&userId=${userId}`;
+
+      const res = await fetch(url, {
+        method: "POST",
+        credentials: "include", 
       });
 
-      const res = await fetch(`${API}/reservations/write?${params.toString()}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json', 
-        },
-      });
+      const contentType = res.headers.get("content-type") || "";
+      let data = null;
+
+      if (contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.error("JSON 아닌 응답:", text.slice(0, 300));
+      }
 
       if (res.ok) {
         alert("예약 성공!");
-        fetchRemainingSeats(); 
+        fetchRemainingSeats(); // 예약 후 좌석 수 갱신
       } else {
-        const errorData = await res.json();
-        alert(errorData?.message || "예약 실패... 다시 시도해주세요.");
+        alert(data?.message || `예약 실패 (status=${res.status})`);
       }
     } catch (error) {
       console.error(error);
@@ -94,6 +136,15 @@ const Movie = () => {
           <S.ContentRow>
             <S.MapPane>
               <img src="/assets/images/school.png" alt="학교 지도" />
+              <S.MapPin1>
+                <img src="/assets/images/red.png" alt="아이콘" />
+              </S.MapPin1>
+              <S.MapPin2>
+                <img src="/assets/images/blue.png" alt="아이콘" />
+              </S.MapPin2>
+              <S.MapPin3>
+                <img src="/assets/images/yellow.png" alt="아이콘" />
+              </S.MapPin3>
             </S.MapPane>
 
             <S.SidePane>
@@ -113,7 +164,9 @@ const Movie = () => {
 
                 <S.InfoCardFloorWrap>
                   <S.InfoCardMovie><p>제목</p></S.InfoCardMovie>
-                  <S.InfoCardTitle><p>코렐라인</p></S.InfoCardTitle>
+                  <S.InfoCardTitle>
+                    <p>{targetMovie ? targetMovie.movieTitle : "준비중"}</p>
+                  </S.InfoCardTitle>
                 </S.InfoCardFloorWrap>
               </S.InfoCard>
 
@@ -122,7 +175,9 @@ const Movie = () => {
 
                 <S.ReservationRow>
                   <S.ReservationLabel>시간</S.ReservationLabel>
-                  <S.ReservationSeat>18:00 ~ 19:41</S.ReservationSeat>
+                  <S.ReservationSeat>
+                    {targetMovie ? targetMovie.movieTime : "-"}
+                  </S.ReservationSeat>
                 </S.ReservationRow>
 
                 <S.ReservationRow>
@@ -146,62 +201,60 @@ const Movie = () => {
 
                 <S.ReservationRow>
                   <S.ReservationLabel>좌석</S.ReservationLabel>
-                  <S.ReservationSeat>
-                    {countLoading ? '조회중...' : `${remainingSeats ?? '-'}석`}
-                  </S.ReservationSeat>
+                  <S.Reservation>
+                    <S.ReservationSeat>
+                      {countLoading ? '조회중...' : `${remainingSeats ?? '-'}`}
+                    </S.ReservationSeat>
+                    <S.ReservationAll>
+                       / {targetMovie ? targetMovie.moviePeopleAll : "0"}석
+                    </S.ReservationAll>
+                  </S.Reservation>
                 </S.ReservationRow>
 
                 <S.ReservationRow>
-                  <S.ReservationButton onClick={handleReservation}>
-                    예약하기
+                  <S.ReservationButton 
+                    onClick={handleReservation}
+                    disabled={isSoldOut}
+                  >
+                    {isSoldOut ? "매진" : "예약하기"}
                   </S.ReservationButton>
                 </S.ReservationRow>
               </S.ReservationCard>
             </S.SidePane>
           </S.ContentRow>    
         </S.BannerWrap>
-<S.Content>
+        
+        <S.Content>
           <S.SchoolInfo>
-            <S.ListTitle>12월 18일 자동차 극장</S.ListTitle>
+            <S.ListTitle>
+                {targetMovie 
+                  ? `${formatDate(targetMovie.screeningDate)} 자동차 극장` 
+                  : "영화 일정 없음"}
+            </S.ListTitle>
             
             <S.CardGrid>
-              {/* 1번 카드 */}
               <S.Card>
-                <S.CardIcon>
-                  <img src="/assets/images/red.png" alt="위치 아이콘" />
-                </S.CardIcon>
-                <S.CardImg>
-                  <img src="/assets/images/movieschool1.png" alt="학교" />
-                </S.CardImg>
+                <S.CardIcon><img src="/assets/images/red.png" alt="아이콘" /></S.CardIcon>
+                <S.CardImg><img src="/assets/images/movieschool1.png" alt="학교" /></S.CardImg>
                 <S.SchoolName>양평초</S.SchoolName>
-                <S.InfoLine><img src="/assets/images/marker.png" alt="학교 주소" /><span>경기도 포천시 영중면 전영로1429번길 5</span></S.InfoLine>
+                <S.InfoLine><img src="/assets/images/marker.png" alt="주소" /><span>경기도 포천시 영중면 전영로1429번길 5</span></S.InfoLine>
                 <S.InfoLine><img src="/assets/images/phone.png" alt="전화" /><span>031-539-0033</span></S.InfoLine>
               </S.Card>
 
-              {/* 2번 카드 */}
               <S.Card>
-                <S.CardIcon>
-                  <img src="/assets/images/blue.png" alt="위치 아이콘" />
-                </S.CardIcon>
-                <S.CardImg>
-                  <img src="/assets/images/movieschool2.jpg" alt="학교" />
-                </S.CardImg>
+                <S.CardIcon><img src="/assets/images/blue.png" alt="아이콘" /></S.CardIcon>
+                <S.CardImg><img src="/assets/images/movieschool2.jpg" alt="학교" /></S.CardImg>
                 <S.SchoolName>덕수고</S.SchoolName>
-                <S.InfoLine><img src="/assets/images/marker.png" alt="학교 주소" /><span>서울특별시 성동구 왕십리로 199</span></S.InfoLine>
+                <S.InfoLine><img src="/assets/images/marker.png" alt="주소" /><span>서울특별시 성동구 왕십리로 199</span></S.InfoLine>
                 <S.InfoLine><img src="/assets/images/phone.png" alt="전화" /><span>02-2286-3704</span></S.InfoLine>
               </S.Card>
 
-              {/* 3번 카드 */}
               <S.Card>
-                <S.CardIcon>
-                  <img src="/assets/images/yellow.png" alt="위치 아이콘" />
-                </S.CardIcon>
-                <S.CardImg>
-                  <img src="/assets/images/movieschool3.png" alt="학교" />
-                </S.CardImg>
+                <S.CardIcon><img src="/assets/images/yellow.png" alt="아이콘" /></S.CardIcon>
+                <S.CardImg><img src="/assets/images/movieschool3.png" alt="학교" /></S.CardImg>
                 <S.SchoolName>구.백성초</S.SchoolName>
-                <S.InfoLine><img src="/assets/images/marker.png" alt="학교 주소" /><span>경기도 안성시 백성2길 59</span></S.InfoLine>
-                <S.InfoLine><img src="/assets/images/phone.png" alt="전화" /><span>031-678-5271</span></S.InfoLine>
+                <S.InfoLine><img src="/assets/images/marker.png" alt="주소" /><span>경기도 안성시 백성2길 59</span></S.InfoLine>
+                <S.InfoLine><img src="/assets/images/phone.png" alt="전화" /><span>031-678-5271</span></S.InfoLine> 
               </S.Card>
             </S.CardGrid>
           </S.SchoolInfo>
